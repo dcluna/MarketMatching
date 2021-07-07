@@ -174,7 +174,7 @@ check_inputs <- function(data=NULL, id=NULL, matching_variable=NULL, date_variab
   stopif(class(data[[date_variable]]) != "Date", TRUE, "ERROR: date_variable is not a Date. Check your data frame.")
 }
 
-#' @importFrom reshape2 melt dcast
+#' @importFrom reshape2 melt dcast gtools
 create_market_vectors <- function(data, test_market, ref_market){
   ## nulling to avoid CRAN notes
   id_var <- NULL
@@ -194,7 +194,8 @@ create_market_vectors <- function(data, test_market, ref_market){
     ref <- reshape2::dcast(subset(d, id_var %in% ref_market), date_var ~ id_var, value.var="match_var")
     names(ref) <- c("date_var", paste0("x", seq(1:length(ref_market))))
     f <- data.frame(dplyr::inner_join(test, ref, by="date_var"))
-    f <- stats::na.omit(f)
+    ## f <- stats::na.omit(f)
+    f <- na.replace(f, 0)
     return(list(as.numeric(f$y), dplyr::select(f, num_range("x", 1:length(ref_market))), as.Date(f$date_var)))
   }
 }
